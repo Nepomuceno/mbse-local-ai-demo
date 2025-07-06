@@ -1,0 +1,21 @@
+general_settings:
+  master_key:
+
+model_list:
+  - model_name: gpt4o-main         # Azure primary
+    litellm_params:
+      model: "azure/gpt-4o"
+      api_base: os.environ/AZURE_API_BASE
+      api_key:  os.environ/AZURE_API_KEY
+      api_version: "2025-02-15-preview"
+      num_retries: 2
+
+  - model_name: qwen3-local       # Local backup
+    litellm_params:
+      model: "ollama_chat/qwen3:30b-a3b"
+      api_base: "http://host.docker.internal:11434"  # Ollama on the host
+      keep_alive: "5m"
+
+router_settings:
+  fallbacks:
+    - { "gpt4o-main": ["qwen3-local"] }

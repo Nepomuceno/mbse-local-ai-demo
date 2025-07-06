@@ -1,0 +1,69 @@
+general_settings:
+  master_key: ""
+
+model_list:
+  # Primary GitHub Copilot model - fast and coding-focused
+  - model_name: gpt-3.5-turbo
+    litellm_params:
+      model: "ollama_chat/qwen2.5-coder:7b"
+      api_base: "http://host.docker.internal:11434"
+      keep_alive: "10m"
+      temperature: 0.1
+      max_tokens: 2048
+      stream: true
+
+  # More capable coding model for complex tasks
+  - model_name: gpt-4
+    litellm_params:
+      model: "ollama_chat/codellama:13b"
+      api_base: "http://host.docker.internal:11434"
+      keep_alive: "10m"
+      temperature: 0.1
+      max_tokens: 4096
+      stream: true
+
+  # Advanced model for architecture and design
+  - model_name: gpt-4o
+    litellm_params:
+      model: "ollama_chat/deepseek-coder:6.7b"
+      api_base: "http://host.docker.internal:11434"
+      keep_alive: "15m"
+      temperature: 0.2
+      max_tokens: 8192
+      stream: true
+
+  # Fast model for autocomplete and suggestions
+  - model_name: text-davinci-003
+    litellm_params:
+      model: "ollama_chat/qwen2.5-coder:1.5b"
+      api_base: "http://host.docker.internal:11434"
+      keep_alive: "30m"
+      temperature: 0.05
+      max_tokens: 1024
+      stream: true
+
+router_settings:
+  fallbacks:
+    - { "gpt-3.5-turbo": ["text-davinci-003", "gpt-4"] }
+    - { "gpt-4": ["gpt-3.5-turbo", "gpt-4o"] }
+    - { "gpt-4o": ["gpt-4", "gpt-3.5-turbo"] }
+    - { "text-davinci-003": ["gpt-3.5-turbo"] }
+  
+  routing_strategy: "least-busy"
+  num_retries: 2
+  timeout: 30
+  
+  # Optimize for coding tasks
+  model_specific_settings:
+    "gpt-3.5-turbo":
+      priority: 1
+      max_parallel_requests: 10
+    "text-davinci-003":
+      priority: 2
+      max_parallel_requests: 20
+    "gpt-4":
+      priority: 3
+      max_parallel_requests: 5
+    "gpt-4o":
+      priority: 4
+      max_parallel_requests: 2

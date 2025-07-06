@@ -1,0 +1,53 @@
+{
+  "name": "LocalAI",
+  "dockerFile": "Dockerfile",
+
+  // Optional: pick a Python version at build-time
+  "build": {
+    "args": { "VARIANT": "3.12" }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  /* ----------------------------------------------------------------
+   * VS Code customisation
+   * ---------------------------------------------------------------- */
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.defaultInterpreterPath": "/workspaces/mbse-local-ai/.venv/bin/python",
+        "python.formatting.provider": "ruff",
+        "editor.formatOnSave": true
+      },
+      "extensions": [
+        /* Python essentials */
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+
+        /* TOML editing support */
+        "tamasfe.even-better-toml",
+
+        /* Mermaid authoring & preview */
+        "vstirbu.vscode-mermaid-preview",
+        "bierner.markdown-mermaid",   
+        "tomoyukim.vscode-mermaid-editor",
+        "mermaidchart.vscode-mermaid-chart",
+
+        /* Copilot goodness */
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+
+        /* Quality-of-life */
+        "eamodio.gitlens",
+        "ms-azuretools.vscode-docker",
+        "streetsidesoftware.code-spell-checker"
+      ]
+    }
+  },
+
+  /* Run external post-create script */
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+
+  /* Default container user */
+  "remoteUser": "vscode"
+}

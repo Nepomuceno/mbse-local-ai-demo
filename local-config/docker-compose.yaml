@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  litellm:
+    image: ghcr.io/berriai/litellm:main-stable
+    ports: [ "4000:4000" ]
+    volumes:
+      - ./litellm_config.yaml:/app/config.yaml:ro
+    environment:
+      - AZURE_API_KEY=5plsVX7myixxVJ2EmvFoeh0A1R63HAxXP8QleyVftV3PXH3DVWnsJQQJ99BCACHYHv6XJ3w3AAAAACOG2UFP
+      - AZURE_API_BASE=https://admin-m8fg494d-eastus2.openai.azure.com/
+    command: [ "--config", "/app/config.yaml", "--port", "4000" ]

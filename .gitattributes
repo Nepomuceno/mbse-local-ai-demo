@@ -1,0 +1,186 @@
+# Set default behavior to automatically normalize line endings.
+* text=auto
+# Force batch scripts to always use CRLF line endings so that if a repo is accessed
+# in Windows via a file share from Linux, the scripts will work.
+*.{cmd,[cC][mM][dD]} text eol=crlf
+*.{bat,[bB][aA][tT]} text eol=crlf
+# Force bash scripts to always use LF line endings so that if a repo is accessed
+# in Unix via a file share from Windows, the scripts will work.
+*.sh text eol=lf
+# Explicitly declare text files you want to always be normalized and converted
+# to native line endings on checkout.
+*.py text
+*.js text
+*.ts text
+*.jsx text
+*.tsx text
+*.json text
+*.yaml text
+*.yml text
+*.toml text
+*.cfg text
+*.ini text
+*.md text
+*.txt text
+*.rst text
+*.html text
+*.css text
+*.scss text
+*.sass text
+*.less text
+*.xml text
+*.svg text
+*.sql text
+*.gitignore text
+*.gitattributes text
+*.gitconfig text
+*.gitmodules text
+*.dockerignore text
+Dockerfile text
+Caddyfile text
+Makefile text
+*.mk text
+*.makefile text
+# Declare files that will always have CRLF line endings on checkout.
+*.sln text eol=crlf
+*.csproj text eol=crlf
+*.vbproj text eol=crlf
+*.vcxproj text eol=crlf
+*.vcproj text eol=crlf
+# Denote all files that are truly binary and should not be modified.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.bmp binary
+*.tiff binary
+*.tif binary
+*.pdf filter=lfs diff=lfs merge=lfs -text
+*.doc binary
+*.docx binary
+*.xls binary
+*.xlsx binary
+*.ppt binary
+*.pptx binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.7z binary
+*.rar binary
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+*.app binary
+*.deb binary
+*.rpm binary
+*.msi binary
+*.dmg binary
+*.iso binary
+*.jar binary
+*.war binary
+*.ear binary
+*.class binary
+*.pyc binary
+*.pyo binary
+*.pyd binary
+*.whl binary
+*.egg binary
+*.pkl binary
+*.pickle binary
+*.db binary
+*.sqlite binary
+*.sqlite3 binary
+# Certificate and key files
+*.pem binary
+*.key binary
+*.crt binary
+*.cer binary
+*.p12 binary
+*.pfx binary
+*.jks binary
+# Font files
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.eot binary
+# Audio files
+*.mp3 binary
+*.wav binary
+*.flac binary
+*.aac binary
+*.ogg binary
+*.m4a binary
+# Video files
+*.mp4 binary
+*.avi binary
+*.mov binary
+*.wmv binary
+*.flv binary
+*.webm binary
+*.mkv binary
+# Configuration for diff and merge tools
+*.py diff=python
+*.js diff=javascript
+*.ts diff=typescript
+*.md diff=markdown
+*.json diff=json
+*.yaml diff=yaml
+*.yml diff=yaml
+# Mermaid diagram files
+*.mmd text
+*.mermaid text
+# Jupyter notebooks
+*.ipynb text
+# Requirements files
+requirements*.txt text
+requirements*.in text
+Pipfile text
+Pipfile.lock text
+poetry.lock text
+package.json text
+package-lock.json text
+yarn.lock text
+# Docker files
+docker-compose*.yml text
+docker-compose*.yaml text
+# Configuration files
+*.conf text
+*.config text
+litellm_config.yaml text
+# Log files (treat as text but with special handling)
+*.log text
+# Export ignore for certain paths (files/directories that should not be included in archives)
+.gitignore export-ignore
+.gitattributes export-ignore
+.github/ export-ignore
+.vscode/ export-ignore
+.idea/ export-ignore
+tests/ export-ignore
+docs/ export-ignore
+*.test.py export-ignore
+*.spec.py export-ignore
+
+# Git LFS configuration for large files
+mcp_server/data/*.pdf filter=lfs diff=lfs merge=lfs -text
+
+# Additional LFS patterns for future use
+*.doc filter=lfs diff=lfs merge=lfs -text
+*.docx filter=lfs diff=lfs merge=lfs -text
+*.ppt filter=lfs diff=lfs merge=lfs -text
+*.pptx filter=lfs diff=lfs merge=lfs -text
+*.xls filter=lfs diff=lfs merge=lfs -text
+*.xlsx filter=lfs diff=lfs merge=lfs -text
+
+# Large data files
+*.zip filter=lfs diff=lfs merge=lfs -text
+*.tar.gz filter=lfs diff=lfs merge=lfs -text
+*.7z filter=lfs diff=lfs merge=lfs -text
+
+# Model files
+*.bin filter=lfs diff=lfs merge=lfs -text
+*.model filter=lfs diff=lfs merge=lfs -text
+*.pkl filter=lfs diff=lfs merge=lfs -text
+*.h5 filter=lfs diff=lfs merge=lfs -text

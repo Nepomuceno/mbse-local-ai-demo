@@ -1,0 +1,5 @@
+# Caddyfile
+api.openai.com:443 {
+	tls api.openai.com.pem api.openai.com-key.pem
+	reverse_proxy 127.0.0.1:4000
+}

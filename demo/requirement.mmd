@@ -1,0 +1,74 @@
+mermaid.requirementDiagram
+requirementDiagram
+
+%% ── Requirements ───────────────────────────────────────────────────────
+requirement "FUEL_MONITOR" {
+    id: "R1"
+    text: "The system shall continuously display current fuel level."
+    risk: high
+    verifymethod: test
+}
+
+requirement "LOW_FUEL_ALERT" {
+    id: "R2"
+    text: "The system shall alert the pilot when fuel is below a safe threshold."
+    risk: high
+    verifymethod: test
+}
+
+requirement "ORIENTATION_COMP" {
+    id: "R3"
+    text: "The system shall compensate fuel readings for aircraft pitch and roll."
+    risk: medium
+    verifymethod: analysis
+}
+
+requirement "FALSE_ALARM_CHECK" {
+    id: "R4"
+    text: "If aircraft is not level, re-evaluate low-fuel condition after leveling."
+    risk: medium
+    verifymethod: analysis
+}
+
+requirement "TEMPERATURE_ALERT" {
+    id: "R5"
+    text: "The system shall alert the pilot when engine temperature exceeds safe limits."
+    risk: high
+    verifymethod: test
+}
+
+%% ── Design Elements ────────────────────────────────────────────────────
+element "Fuel_Sensor" {
+    type: "hardware"
+}
+
+element "Flight_Computer" {
+    type: "embedded software"
+}
+
+element "Cockpit_Display" {
+    type: "avionics UI"
+}
+
+%% ── Requirement Relationships ─────────────────────────────────────────
+"LOW_FUEL_ALERT"    - traces  -> "FUEL_MONITOR"
+"ORIENTATION_COMP"  - refines -> "FUEL_MONITOR"
+"FALSE_ALARM_CHECK" - refines -> "LOW_FUEL_ALERT"
+
+%% ── Satisfaction Links ────────────────────────────────────────────────
+"Fuel_Sensor"       - satisfies -> "FUEL_MONITOR"
+"Fuel_Sensor"       - satisfies -> "ORIENTATION_COMP"
+"Flight_Computer"   - satisfies -> "ORIENTATION_COMP"
+"Flight_Computer"   - satisfies -> "TEMPERATURE_ALERT"
+"Cockpit_Display"   - satisfies -> "LOW_FUEL_ALERT"
+"Cockpit_Display"   - satisfies -> "FALSE_ALARM_CHECK"
+
+%% ── Styling: class definitions (Dark Theme) ───────────────────────────
+classDef highRisk fill:#4a1a1a,stroke:#ff6b6b,stroke-width:2px,color:#ffffff;
+classDef medRisk  fill:#3a2a0a,stroke:#ffd93d,stroke-width:2px,color:#ffffff;
+classDef designElem fill:#1a2a4a,stroke:#74c0fc,stroke-width:1px,color:#ffffff;
+
+%% ── Apply classes ─────────────────────────────────────────────────────
+class "FUEL_MONITOR","LOW_FUEL_ALERT" highRisk
+class "ORIENTATION_COMP","FALSE_ALARM_CHECK" medRisk
+class "Fuel_Sensor","Flight_Computer","Cockpit_Display" designElem
