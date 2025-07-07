@@ -1,4 +1,3 @@
-mermaid.requirementDiagram
 requirementDiagram
 
 %% ── Requirements ───────────────────────────────────────────────────────
@@ -30,20 +29,9 @@ requirement "FALSE_ALARM_CHECK" {
     verifymethod: analysis
 }
 
-requirement "TEMPERATURE_ALERT" {
-    id: "R5"
-    text: "The system shall alert the pilot when engine temperature exceeds safe limits."
-    risk: high
-    verifymethod: test
-}
-
 %% ── Design Elements ────────────────────────────────────────────────────
 element "Fuel_Sensor" {
     type: "hardware"
-}
-
-element "Flight_Computer" {
-    type: "embedded software"
 }
 
 element "Cockpit_Display" {
@@ -58,8 +46,6 @@ element "Cockpit_Display" {
 %% ── Satisfaction Links ────────────────────────────────────────────────
 "Fuel_Sensor"       - satisfies -> "FUEL_MONITOR"
 "Fuel_Sensor"       - satisfies -> "ORIENTATION_COMP"
-"Flight_Computer"   - satisfies -> "ORIENTATION_COMP"
-"Flight_Computer"   - satisfies -> "TEMPERATURE_ALERT"
 "Cockpit_Display"   - satisfies -> "LOW_FUEL_ALERT"
 "Cockpit_Display"   - satisfies -> "FALSE_ALARM_CHECK"
 
