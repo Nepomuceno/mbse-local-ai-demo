@@ -9,7 +9,7 @@ import fitz  # PyMuPDF
 import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Union, Any, Tuple
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 from datetime import datetime
 
 # Type hints for PyMuPDF objects
@@ -44,12 +44,6 @@ class PageMetadata(BaseModel):
         default=False, description="Whether page contains images")
     has_links: bool = Field(
         default=False, description="Whether page contains links")
-
-    @validator('page_number')
-    def validate_page_number(cls, v):
-        if v < 1:
-            raise ValueError('Page number must be positive')
-        return v
 
 
 class DocumentMetadata(BaseModel):

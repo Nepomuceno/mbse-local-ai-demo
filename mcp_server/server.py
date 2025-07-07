@@ -9,29 +9,16 @@ understand and work with PYRAMID compliance requirements, reference
 architecture components, and implementation guidance.
 """
 
-from document_parser import DocumentParser
-from pdf_processor import PDFProcessor, PDFProcessingError
+from mcp_server.utils.document_parser import DocumentParser
+from mcp_server.utils.pdf_processor import PDFProcessor, PDFProcessingError
 from tools.document_tools import initialize_document_tools
-from tools.compliance_tools import initialize_compliance_tools
 from tools.pra_tools import initialize_pra_tools
 from mcp.server.fastmcp import FastMCP
-import sys
 import os
 from pathlib import Path
-from typing import Dict, Any, Optional, List, Union
+from typing import Dict, Any, Optional
 import logging
 from dotenv import load_dotenv
-
-# Add the project root to the Python path
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
-
-# Add the mcp_server directory to the Python path
-mcp_server_path = Path(__file__).parent
-sys.path.insert(0, str(mcp_server_path))
-
-# Now import the modules after setting up the path
-sys.path.insert(0, str(mcp_server_path))
 
 # Load environment variables
 load_dotenv()
@@ -50,10 +37,9 @@ DATA_DIR = Path(__file__).parent / "data"
 pdf_processor = PDFProcessor()
 document_parser = DocumentParser()
 
-# Initialize Phase 2 tools
+# Initialize tools
 
 initialize_document_tools(DATA_DIR, pdf_processor, document_parser)
-initialize_compliance_tools(DATA_DIR, pdf_processor, document_parser)
 initialize_pra_tools(DATA_DIR, pdf_processor, document_parser)
 
 
@@ -471,11 +457,11 @@ def search_pdf_content(
 
 
 # =============================================================================
-# Phase 2: PYRAMID-Specific Tools
+# PYRAMID-Specific Tools
 # =============================================================================
 
 @mcp.tool()
-def list_pyramid_documents_tool() -> Dict[str, Any]:
+def list_pyramid_documents() -> Dict[str, Any]:
     """
     List available PYRAMID documents with metadata.
 
@@ -487,7 +473,7 @@ def list_pyramid_documents_tool() -> Dict[str, Any]:
 
 
 @mcp.tool()
-def read_pdf_content_tool(
+def read_pdf_content(
     file_path: str,
     page_range: Optional[str] = None,
     section_filter: Optional[str] = None
@@ -508,7 +494,7 @@ def read_pdf_content_tool(
 
 
 @mcp.tool()
-def get_document_metadata_tool(file_path: str) -> Dict[str, Any]:
+def get_document_metadata(file_path: str) -> Dict[str, Any]:
     """
     Get document information and structure metadata.
 
@@ -523,7 +509,7 @@ def get_document_metadata_tool(file_path: str) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def search_documents_tool(
+def search_documents(
     query: str,
     doc_filter: Optional[str] = None,
     max_results: int = 10
@@ -544,7 +530,7 @@ def search_documents_tool(
 
 
 @mcp.tool()
-def get_document_outline_tool(file_path: str) -> Dict[str, Any]:
+def get_document_outline(file_path: str) -> Dict[str, Any]:
     """
     Extract document structure/table of contents.
 
@@ -558,89 +544,8 @@ def get_document_outline_tool(file_path: str) -> Dict[str, Any]:
     return get_document_outline(file_path)
 
 
-# Compliance Tools
 @mcp.tool()
-def get_compliance_rules_tool(
-    category: Optional[str] = None,
-    rule_type: Optional[str] = None
-) -> Dict[str, Any]:
-    """
-    Retrieve compliance guidance and rules from PYRAMID documents.
-
-    Args:
-        category: Category filter (e.g., "Security", "Interoperability", "Data")
-        rule_type: Type of rule (e.g., "must", "shall", "should")
-
-    Returns:
-        Dict containing compliance rules
-    """
-    from tools.compliance_tools import get_compliance_rules
-    return get_compliance_rules(category, rule_type)
-
-
-@mcp.tool()
-def search_compliance_requirements_tool(query: str) -> Dict[str, Any]:
-    """
-    Find specific compliance requirements based on query.
-
-    Args:
-        query: Search query for compliance requirements
-
-    Returns:
-        Dict containing matching compliance requirements
-    """
-    from tools.compliance_tools import search_compliance_requirements
-    return search_compliance_requirements(query)
-
-
-@mcp.tool()
-def get_compliance_checklist_tool(system_type: Optional[str] = None) -> Dict[str, Any]:
-    """
-    Generate compliance checklists for different system types.
-
-    Args:
-        system_type: Type of system (e.g., "Command and Control", "Intelligence", "Logistics")
-
-    Returns:
-        Dict containing compliance checklist
-    """
-    from tools.compliance_tools import get_compliance_checklist
-    return get_compliance_checklist(system_type)
-
-
-@mcp.tool()
-def validate_compliance_claim_tool(claim_text: str) -> Dict[str, Any]:
-    """
-    Check compliance statements against PYRAMID requirements.
-
-    Args:
-        claim_text: Text of the compliance claim to validate
-
-    Returns:
-        Dict containing validation results
-    """
-    from tools.compliance_tools import validate_compliance_claim
-    return validate_compliance_claim(claim_text)
-
-
-@mcp.tool()
-def get_compliance_examples_tool(scenario: Optional[str] = None) -> Dict[str, Any]:
-    """
-    Access compliance examples and use cases.
-
-    Args:
-        scenario: Specific scenario type (e.g., "data exchange", "system integration")
-
-    Returns:
-        Dict containing compliance examples
-    """
-    from tools.compliance_tools import get_compliance_examples
-    return get_compliance_examples(scenario)
-
-
-# PRA (PYRAMID Reference Architecture) Tools
-@mcp.tool()
-def search_pra_components_tool(
+def search_pra_components(
     component_type: Optional[str] = None,
     category: Optional[str] = None
 ) -> Dict[str, Any]:
@@ -659,7 +564,7 @@ def search_pra_components_tool(
 
 
 @mcp.tool()
-def get_component_details_tool(component_id: str) -> Dict[str, Any]:
+def get_pra_component_details(component_id: str) -> Dict[str, Any]:
     """
     Get detailed information about a specific PRA component.
 
@@ -674,22 +579,7 @@ def get_component_details_tool(component_id: str) -> Dict[str, Any]:
 
 
 @mcp.tool()
-def get_interaction_views_tool(scenario_name: Optional[str] = None) -> Dict[str, Any]:
-    """
-    Access integration examples and interaction scenarios.
-
-    Args:
-        scenario_name: Specific scenario name to search for
-
-    Returns:
-        Dict containing interaction views and scenarios
-    """
-    from tools.pra_tools import get_interaction_views
-    return get_interaction_views(scenario_name)
-
-
-@mcp.tool()
-def search_component_relationships_tool(component_id: str) -> Dict[str, Any]:
+def search_pra_component_relationships(component_id: str) -> Dict[str, Any]:
     """
     Find relationships between components.
 
@@ -701,21 +591,6 @@ def search_component_relationships_tool(component_id: str) -> Dict[str, Any]:
     """
     from tools.pra_tools import search_component_relationships
     return search_component_relationships(component_id)
-
-
-@mcp.tool()
-def get_deployment_patterns_tool(use_case: Optional[str] = None) -> Dict[str, Any]:
-    """
-    Get common deployment configurations and patterns.
-
-    Args:
-        use_case: Specific use case to filter patterns
-
-    Returns:
-        Dict containing deployment patterns
-    """
-    from tools.pra_tools import get_deployment_patterns
-    return get_deployment_patterns(use_case)
 
 
 def main():

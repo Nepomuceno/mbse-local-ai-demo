@@ -11,8 +11,8 @@ from typing import Dict, Any, Optional
 import logging
 
 # Import the existing processors
-from mcp_server.pdf_processor import PDFProcessor, PDFProcessingError
-from mcp_server.document_parser import DocumentParser
+from mcp_server.utils.pdf_processor import PDFProcessor, PDFProcessingError
+from mcp_server.utils.document_parser import DocumentParser
 
 logger = logging.getLogger(__name__)
 

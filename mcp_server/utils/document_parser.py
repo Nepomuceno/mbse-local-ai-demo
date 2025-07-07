@@ -9,12 +9,12 @@ import re
 import logging
 from typing import Dict, List, Optional, Tuple, Any, Union
 from pathlib import Path
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 from enum import Enum
 import fitz
 import logging
 
-from pdf_processor import PDFProcessor, ExtractedContent, PDFProcessingError
+from mcp_server.utils.pdf_processor import PDFProcessor, ExtractedContent, PDFProcessingError
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -58,12 +58,6 @@ class DocumentSection(BaseModel):
         None, description="Section number (e.g., '1.2.3')")
     parent_section: Optional[str] = Field(
         None, description="Parent section title")
-
-    @validator('level')
-    def validate_level(cls, v):
-        if v < 0 or v > 5:
-            raise ValueError('Level must be between 0 and 5')
-        return v
 
     class Config:
         # Allow forward references for recursive model

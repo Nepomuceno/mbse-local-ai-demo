@@ -3,7 +3,7 @@
 Test script to verify PDF metadata extraction works with real PDF files.
 """
 
-from pdf_processor import PDFProcessor
+from mcp_server.utils.pdf_processor import PDFProcessor
 import sys
 from pathlib import Path
 
