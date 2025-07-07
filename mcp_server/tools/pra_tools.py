@@ -33,6 +33,8 @@ def search_pra_components(
     """
     Find PRA components by type and category.
 
+    MOCK VERSION: Returns sample PRA components for testing.
+
     Args:
         component_type: Type of component (e.g., "Core", "Optional", "Interface")
         category: Category filter (e.g., "Data", "Communication", "Security")
@@ -41,135 +43,121 @@ def search_pra_components(
         Dict containing matching PRA components
     """
     try:
-        if not data_dir or not data_dir.exists():
-            return {
-                "error": "Data directory not found",
-                "component_type": component_type,
-                "category": category,
-                "components": []
+        # Mock PRA components data
+        mock_components = [
+            {
+                "name": "Data Management Service",
+                "type": "Core",
+                "category": "Data",
+                "description": "Core service responsible for managing data ingestion, storage, and retrieval across the PYRAMID architecture.",
+                "source_document": "PYRAMID_Technical_Standard_V1.pdf",
+                "confidence": "high"
+            },
+            {
+                "name": "Security Authentication Module",
+                "type": "Core",
+                "category": "Security",
+                "description": "Essential security component that handles user authentication and authorization for all PYRAMID services.",
+                "source_document": "PYRAMID_Technical_Standard_V1.pdf",
+                "confidence": "high"
+            },
+            {
+                "name": "Communication Protocol Handler",
+                "type": "Interface",
+                "category": "Communication",
+                "description": "Interface component that manages communication protocols between different PYRAMID components.",
+                "source_document": "PYRAMID_Technical_Standard_Guidance_V1.pdf",
+                "confidence": "medium"
+            },
+            {
+                "name": "User Interface Gateway",
+                "type": "Interface",
+                "category": "User Interface",
+                "description": "Gateway component that provides standardized user interface access to PYRAMID services.",
+                "source_document": "PYRAMID_Technical_Standard_V1.pdf",
+                "confidence": "medium"
+            },
+            {
+                "name": "System Monitor",
+                "type": "Optional",
+                "category": "Management",
+                "description": "Optional monitoring component that tracks system performance and health metrics.",
+                "source_document": "PYRAMID_Technical_Standard_Guidance_V1.pdf",
+                "confidence": "medium"
+            },
+            {
+                "name": "Data Exchange Broker",
+                "type": "Core",
+                "category": "Data",
+                "description": "Core component that facilitates secure data exchange between different systems and organizations.",
+                "source_document": "PYRAMID_Technical_Standard_V1.pdf",
+                "confidence": "high"
+            },
+            {
+                "name": "Network Security Filter",
+                "type": "Optional",
+                "category": "Security",
+                "description": "Optional security component that provides additional network-level filtering and protection.",
+                "source_document": "PYRAMID_Technical_Standard_Guidance_V1.pdf",
+                "confidence": "medium"
+            },
+            {
+                "name": "Integration Bus",
+                "type": "Core",
+                "category": "Communication",
+                "description": "Core integration component that enables seamless communication between various PYRAMID services.",
+                "source_document": "PYRAMID_Technical_Standard_V1.pdf",
+                "confidence": "high"
+            },
+            {
+                "name": "Configuration Manager",
+                "type": "Optional",
+                "category": "Management",
+                "description": "Management component that handles configuration settings and deployment parameters.",
+                "source_document": "PYRAMID_Technical_Standard_Guidance_V1.pdf",
+                "confidence": "medium"
+            },
+            {
+                "name": "Audit Trail Processor",
+                "type": "Optional",
+                "category": "Security",
+                "description": "Security component that maintains comprehensive audit trails for compliance and monitoring.",
+                "source_document": "PYRAMID_Technical_Standard_V1.pdf",
+                "confidence": "medium"
             }
+        ]
 
-        if not pdf_processor:
-            return {
-                "error": "PDF processor not initialized",
-                "component_type": component_type,
-                "category": category,
-                "components": []
-            }
+        # Filter by component type if specified
+        filtered_components = mock_components
+        if component_type:
+            filtered_components = [
+                comp for comp in filtered_components
+                if component_type.lower() in comp["type"].lower()
+            ]
 
-        components = []
-
-        # Find PYRAMID documents
-        pyramid_files = []
-        for pdf_file in data_dir.glob("*.pdf"):
-            if "PYRAMID" in pdf_file.name:
-                pyramid_files.append(pdf_file)
-
-        # Search for components in each document
-        for pdf_file in pyramid_files:
-            try:
-                content = pdf_processor.extract_pdf_content(pdf_file)
-
-                # Component identification patterns
-                component_patterns = [
-                    r'(?:component|module|service|element)[:\s]+([A-Z][A-Za-z\s]+?)(?:\n|\.)',
-                    r'([A-Z][A-Za-z\s]+?)\s+(?:component|module|service|element)',
-                    r'(?:PRA|PYRAMID)\s+([A-Z][A-Za-z\s]+?)\s+(?:component|module)',
-                    r'(?:core|optional|interface)\s+([A-Z][A-Za-z\s]+?)(?:\n|\.)',
-                ]
-
-                for pattern in component_patterns:
-                    matches = re.findall(
-                        pattern, content.text, re.IGNORECASE | re.MULTILINE)
-
-                    for match in matches:
-                        component_name = match.strip()
-                        if len(component_name) < 5 or len(component_name) > 50:
-                            continue  # Skip very short or very long names
-
-                        # Determine component type
-                        comp_type = "General"
-                        text_around = content.text.lower()
-                        if "core" in text_around:
-                            comp_type = "Core"
-                        elif "optional" in text_around:
-                            comp_type = "Optional"
-                        elif "interface" in text_around:
-                            comp_type = "Interface"
-                        elif "integration" in text_around:
-                            comp_type = "Integration"
-
-                        # Apply component type filter
-                        if component_type and component_type.lower() not in comp_type.lower():
-                            continue
-
-                        # Determine category
-                        comp_category = "General"
-                        if any(term in component_name.lower() for term in ["data", "information", "metadata"]):
-                            comp_category = "Data"
-                        elif any(term in component_name.lower() for term in ["communication", "network", "protocol"]):
-                            comp_category = "Communication"
-                        elif any(term in component_name.lower() for term in ["security", "authentication", "authorization"]):
-                            comp_category = "Security"
-                        elif any(term in component_name.lower() for term in ["user", "interface", "gui", "ui"]):
-                            comp_category = "User Interface"
-                        elif any(term in component_name.lower() for term in ["management", "control", "monitor"]):
-                            comp_category = "Management"
-
-                        # Apply category filter
-                        if category and category.lower() not in comp_category.lower():
-                            continue
-
-                        # Extract description (text around the component)
-                        component_pos = content.text.lower().find(component_name.lower())
-                        if component_pos != -1:
-                            desc_start = max(0, component_pos - 100)
-                            desc_end = min(
-                                len(content.text), component_pos + len(component_name) + 200)
-                            description = content.text[desc_start:desc_end].strip(
-                            )
-                        else:
-                            description = f"Component found in {pdf_file.name}"
-
-                        components.append({
-                            "name": component_name,
-                            "type": comp_type,
-                            "category": comp_category,
-                            "description": description,
-                            "source_document": pdf_file.name,
-                            "confidence": "medium"
-                        })
-
-            except Exception as e:
-                logger.error(
-                    f"Error searching for components in {pdf_file}: {e}")
-                continue
-
-        # Remove duplicates based on component name
-        seen_components = set()
-        unique_components = []
-        for comp in components:
-            comp_key = comp["name"].lower()
-            if comp_key not in seen_components:
-                seen_components.add(comp_key)
-                unique_components.append(comp)
+        # Filter by category if specified
+        if category:
+            filtered_components = [
+                comp for comp in filtered_components
+                if category.lower() in comp["category"].lower()
+            ]
 
         # Sort by type and category
-        unique_components.sort(key=lambda x: (
+        filtered_components.sort(key=lambda x: (
             x["type"], x["category"], x["name"]))
 
         return {
             "success": True,
             "component_type": component_type,
             "category": category,
-            "total_components": len(unique_components),
-            "components": unique_components[:25]  # Limit to 25 components
+            "total_components": len(filtered_components),
+            "components": filtered_components
         }
 
     except Exception as e:
-        logger.error(f"Error searching PRA components: {e}")
+        logger.error(f"Error in mock PRA components search: {e}")
         return {
-            "error": f"Search error: {str(e)}",
+            "error": f"Mock search error: {str(e)}",
             "component_type": component_type,
             "category": category,
             "components": []
