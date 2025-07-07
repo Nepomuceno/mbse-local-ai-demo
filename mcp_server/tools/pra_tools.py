@@ -2,12 +2,18 @@
 PRA (PYRAMID Reference Architecture) Tools for PYRAMID MCP Server
 
 This module provides access to PYRAMID Reference Architecture component information, 
-interaction views, and deployment patterns.
+interaction views, and deployment patterns using a centralized mock knowledge graph.
 """
 
 from pathlib import Path
 from typing import Dict, Any, Optional
 import logging
+from mcp_server.data.mock_pyramid_knowledge_graph import (
+    query_knowledge_graph,
+    get_all_component_owners,
+    get_component_by_owner,
+    get_components_by_sector
+)
 
 logger = logging.getLogger(__name__)
 
@@ -29,9 +35,7 @@ def search_pra_components(
     category: Optional[str] = None
 ) -> Dict[str, Any]:
     """
-    Find PRA components by type and category.
-
-    MOCK VERSION: Returns sample PRA components for testing.
+    Find PRA components by type and category using the centralized knowledge graph.
 
     Args:
         component_type: Type of component (e.g., "Core", "Optional", "Interface")
@@ -41,121 +45,40 @@ def search_pra_components(
         Dict containing matching PRA components
     """
     try:
-        # Mock PRA components data
-        mock_components = [
-            {
-                "name": "Data Management Service",
-                "type": "Core",
-                "category": "Data",
-                "description": "Core service responsible for managing data ingestion, storage, and retrieval across the PYRAMID architecture.",
-                "source_document": "PYRAMID_Technical_Standard_V1.pdf",
-                "confidence": "high"
-            },
-            {
-                "name": "Security Authentication Module",
-                "type": "Core",
-                "category": "Security",
-                "description": "Essential security component that handles user authentication and authorization for all PYRAMID services.",
-                "source_document": "PYRAMID_Technical_Standard_V1.pdf",
-                "confidence": "high"
-            },
-            {
-                "name": "Communication Protocol Handler",
-                "type": "Interface",
-                "category": "Communication",
-                "description": "Interface component that manages communication protocols between different PYRAMID components.",
-                "source_document": "PYRAMID_Technical_Standard_Guidance_V1.pdf",
-                "confidence": "medium"
-            },
-            {
-                "name": "User Interface Gateway",
-                "type": "Interface",
-                "category": "User Interface",
-                "description": "Gateway component that provides standardized user interface access to PYRAMID services.",
-                "source_document": "PYRAMID_Technical_Standard_V1.pdf",
-                "confidence": "medium"
-            },
-            {
-                "name": "System Monitor",
-                "type": "Optional",
-                "category": "Management",
-                "description": "Optional monitoring component that tracks system performance and health metrics.",
-                "source_document": "PYRAMID_Technical_Standard_Guidance_V1.pdf",
-                "confidence": "medium"
-            },
-            {
-                "name": "Data Exchange Broker",
-                "type": "Core",
-                "category": "Data",
-                "description": "Core component that facilitates secure data exchange between different systems and organizations.",
-                "source_document": "PYRAMID_Technical_Standard_V1.pdf",
-                "confidence": "high"
-            },
-            {
-                "name": "Network Security Filter",
-                "type": "Optional",
-                "category": "Security",
-                "description": "Optional security component that provides additional network-level filtering and protection.",
-                "source_document": "PYRAMID_Technical_Standard_Guidance_V1.pdf",
-                "confidence": "medium"
-            },
-            {
-                "name": "Integration Bus",
-                "type": "Core",
-                "category": "Communication",
-                "description": "Core integration component that enables seamless communication between various PYRAMID services.",
-                "source_document": "PYRAMID_Technical_Standard_V1.pdf",
-                "confidence": "high"
-            },
-            {
-                "name": "Configuration Manager",
-                "type": "Optional",
-                "category": "Management",
-                "description": "Management component that handles configuration settings and deployment parameters.",
-                "source_document": "PYRAMID_Technical_Standard_Guidance_V1.pdf",
-                "confidence": "medium"
-            },
-            {
-                "name": "Audit Trail Processor",
-                "type": "Optional",
-                "category": "Security",
-                "description": "Security component that maintains comprehensive audit trails for compliance and monitoring.",
-                "source_document": "PYRAMID_Technical_Standard_V1.pdf",
-                "confidence": "medium"
+        # Query the centralized knowledge graph
+        result = query_knowledge_graph(
+            "search",
+            component_type=component_type,
+            category=category
+        )
+
+        if result["success"]:
+            components = result["components"]
+            # Sort by type and category
+            components.sort(key=lambda x: (
+                x["type"], x["category"], x["name"]))
+
+            return {
+                "success": True,
+                "component_type": component_type,
+                "category": category,
+                "total_components": len(components),
+                "components": components,
+                "note": "Data retrieved from centralized PYRAMID knowledge graph"
             }
-        ]
-
-        # Filter by component type if specified
-        filtered_components = mock_components
-        if component_type:
-            filtered_components = [
-                comp for comp in filtered_components
-                if component_type.lower() in comp["type"].lower()
-            ]
-
-        # Filter by category if specified
-        if category:
-            filtered_components = [
-                comp for comp in filtered_components
-                if category.lower() in comp["category"].lower()
-            ]
-
-        # Sort by type and category
-        filtered_components.sort(key=lambda x: (
-            x["type"], x["category"], x["name"]))
-
-        return {
-            "success": True,
-            "component_type": component_type,
-            "category": category,
-            "total_components": len(filtered_components),
-            "components": filtered_components
-        }
+        else:
+            return {
+                "success": False,
+                "error": result.get("error", "Unknown error"),
+                "component_type": component_type,
+                "category": category,
+                "components": []
+            }
 
     except Exception as e:
-        logger.error(f"Error in mock PRA components search: {e}")
+        logger.error(f"Error searching PRA components: {e}")
         return {
-            "error": f"Mock search error: {str(e)}",
+            "error": f"Search error: {str(e)}",
             "component_type": component_type,
             "category": category,
             "components": []
@@ -164,10 +87,7 @@ def search_pra_components(
 
 def get_component_details(component_id: str) -> Dict[str, Any]:
     """
-    Get detailed information about a specific PRA component.
-
-    MOCK VERSION: Returns sample component details for testing.
-    In a real scenario, this would query a database populated from PYRAMID documents.
+    Get detailed information about a specific PRA component using the centralized knowledge graph.
 
     Args:
         component_id: Name or identifier of the component
@@ -176,132 +96,47 @@ def get_component_details(component_id: str) -> Dict[str, Any]:
         Dict containing detailed component information
     """
     try:
-        # Mock component details data
-        mock_details = {
-            "Data Management Service": {
-                "section": {
-                    "title": "Data Management Service",
-                    "content": "The Data Management Service is responsible for managing data ingestion, storage, and retrieval across the PYRAMID architecture. It ensures data consistency, integrity, and availability for all core services.",
-                    "page_range": "12-15",
-                    "source_document": "PYRAMID_Technical_Standard_V1.pdf"
-                },
-                "information": {
-                    "purpose": [
-                        {
-                            "type": "purpose",
-                            "content": "The primary purpose of the Data Management Service is to provide a unified interface for data operations, supporting both structured and unstructured data.",
-                            "source_document": "PYRAMID_Technical_Standard_V1.pdf",
-                            "relevance": "high"
-                        }
-                    ],
-                    "interfaces": [
-                        {
-                            "type": "interfaces",
-                            "content": "Exposes RESTful APIs and supports integration with the Integration Bus for data exchange.",
-                            "source_document": "PYRAMID_Technical_Standard_V1.pdf",
-                            "relevance": "medium"
-                        }
-                    ],
-                    "requirements": [
-                        {
-                            "type": "requirements",
-                            "content": "Must support high availability and data encryption at rest and in transit.",
-                            "source_document": "PYRAMID_Technical_Standard_V1.pdf",
-                            "relevance": "medium"
-                        }
-                    ],
-                    "dependencies": [
-                        {
-                            "type": "dependencies",
-                            "content": "Depends on the Security Authentication Module for access control.",
-                            "source_document": "PYRAMID_Technical_Standard_V1.pdf",
-                            "relevance": "medium"
-                        }
-                    ],
-                    "specifications": [
-                        {
-                            "type": "specifications",
-                            "content": "Compliant with ISO/IEC 11179 for metadata management.",
-                            "source_document": "PYRAMID_Technical_Standard_V1.pdf",
-                            "relevance": "medium"
-                        }
-                    ]
-                }
-            },
-            "Security Authentication Module": {
-                "section": {
-                    "title": "Security Authentication Module",
-                    "content": "Handles user authentication and authorization for all PYRAMID services, ensuring secure access and compliance with security policies.",
-                    "page_range": "16-18",
-                    "source_document": "PYRAMID_Technical_Standard_V1.pdf"
-                },
-                "information": {
-                    "purpose": [
-                        {
-                            "type": "purpose",
-                            "content": "Provides centralized authentication and authorization services.",
-                            "source_document": "PYRAMID_Technical_Standard_V1.pdf",
-                            "relevance": "high"
-                        }
-                    ],
-                    "interfaces": [
-                        {
-                            "type": "interfaces",
-                            "content": "Supports OAuth2 and SAML protocols for secure integration.",
-                            "source_document": "PYRAMID_Technical_Standard_V1.pdf",
-                            "relevance": "medium"
-                        }
-                    ],
-                    "requirements": [
-                        {
-                            "type": "requirements",
-                            "content": "Shall log all authentication attempts and support multi-factor authentication.",
-                            "source_document": "PYRAMID_Technical_Standard_V1.pdf",
-                            "relevance": "medium"
-                        }
-                    ],
-                    "dependencies": [
-                        {
-                            "type": "dependencies",
-                            "content": "Requires access to the User Directory Service.",
-                            "source_document": "PYRAMID_Technical_Standard_V1.pdf",
-                            "relevance": "medium"
-                        }
-                    ],
-                    "specifications": [
-                        {
-                            "type": "specifications",
-                            "content": "Follows NIST SP 800-63B guidelines.",
-                            "source_document": "PYRAMID_Technical_Standard_V1.pdf",
-                            "relevance": "medium"
-                        }
-                    ]
-                }
-            }
-            # Add more mock components as needed
-        }
+        # Query the centralized knowledge graph for component details
+        result = query_knowledge_graph("component", component_id=component_id)
 
-        details = mock_details.get(component_id)
-        if not details:
+        if result["success"]:
+            component_data = result["component"]
+
+            # Structure the response to match the expected format
+            return {
+                "success": True,
+                "component_id": component_id,
+                "found": True,
+                "total_references": len(component_data.get("responsibilities", [])),
+                "details": {
+                    "section": {
+                        "title": component_id,
+                        "content": component_data.get("description", ""),
+                        "source_document": component_data.get("source_document", ""),
+                        "confidence": component_data.get("confidence", "medium")
+                    },
+                    "information": {
+                        "responsibilities": component_data.get("responsibilities", []),
+                        "interfaces": component_data.get("interfaces", []),
+                        "dependencies": component_data.get("dependencies", []),
+                        "provides_to": component_data.get("provides_to", []),
+                        "specifications": component_data.get("specifications", []),
+                        "type": component_data.get("type", "Unknown"),
+                        "category": component_data.get("category", "Unknown")
+                    }
+                },
+                "note": "Data retrieved from centralized PYRAMID knowledge graph"
+            }
+        else:
             return {
                 "success": False,
                 "component_id": component_id,
                 "found": False,
                 "total_references": 0,
                 "details": {},
-                "note": "This is a mock response. In a real scenario, this would query a database populated from PYRAMID documents."
+                "error": result.get("error", "Component not found"),
+                "note": "Data retrieved from centralized PYRAMID knowledge graph"
             }
-
-        total_references = sum(len(v)
-                               for v in details.get("information", {}).values())
-        return {
-            "success": True,
-            "component_id": component_id,
-            "found": True,
-            "total_references": total_references,
-            "details": details,
-            "note": "This is a mock response. In a real scenario, this would query a database populated from PYRAMID documents."
-        }
 
     except Exception as e:
         logger.error(f"Error getting component details: {e}")
@@ -314,10 +149,7 @@ def get_component_details(component_id: str) -> Dict[str, Any]:
 
 def search_component_relationships(component_id: str) -> Dict[str, Any]:
     """
-    Find relationships between components.
-
-    MOCK VERSION: Returns sample relationships for testing.
-    In a real scenario, this would query a database or knowledge graph populated from PYRAMID documents.
+    Find relationships between components using the centralized knowledge graph.
 
     Args:
         component_id: Name or identifier of the component
@@ -326,52 +158,29 @@ def search_component_relationships(component_id: str) -> Dict[str, Any]:
         Dict containing component relationships
     """
     try:
-        # Mock relationships data
-        mock_relationships = {
-            "Data Management Service": [
-                {
-                    "related_component": "Security Authentication Module",
-                    "relationship_type": "Dependency",
-                    "context": "The Data Management Service depends on the Security Authentication Module for access control and secure data operations.",
-                    "source_document": "PYRAMID_Technical_Standard_V1.pdf",
-                    "confidence": "high"
-                },
-                {
-                    "related_component": "Integration Bus",
-                    "relationship_type": "Interface",
-                    "context": "The Data Management Service interfaces with the Integration Bus to enable seamless data exchange across services.",
-                    "source_document": "PYRAMID_Technical_Standard_V1.pdf",
-                    "confidence": "medium"
-                }
-            ],
-            "Security Authentication Module": [
-                {
-                    "related_component": "User Directory Service",
-                    "relationship_type": "Dependency",
-                    "context": "The Security Authentication Module requires access to the User Directory Service for user validation.",
-                    "source_document": "PYRAMID_Technical_Standard_V1.pdf",
-                    "confidence": "medium"
-                },
-                {
-                    "related_component": "Data Management Service",
-                    "relationship_type": "Provider",
-                    "context": "The Security Authentication Module provides authentication services to the Data Management Service.",
-                    "source_document": "PYRAMID_Technical_Standard_V1.pdf",
-                    "confidence": "medium"
-                }
-            ]
-            # Add more mock relationships as needed
-        }
+        # Query the centralized knowledge graph for relationships
+        result = query_knowledge_graph(
+            "relationship", component_id=component_id)
 
-        relationships = mock_relationships.get(component_id, [])
+        if result["success"]:
+            relationships = result["relationships"]
 
-        return {
-            "success": True,
-            "component_id": component_id,
-            "total_relationships": len(relationships),
-            "relationships": relationships,
-            "note": "This is a mock response. In a real scenario, this would query a database or knowledge graph populated from PYRAMID documents."
-        }
+            return {
+                "success": True,
+                "component_id": component_id,
+                "total_relationships": len(relationships),
+                "relationships": relationships,
+                "note": "Data retrieved from centralized PYRAMID knowledge graph"
+            }
+        else:
+            return {
+                "success": False,
+                "component_id": component_id,
+                "total_relationships": 0,
+                "relationships": [],
+                "error": result.get("error", "Component not found"),
+                "note": "Data retrieved from centralized PYRAMID knowledge graph"
+            }
 
     except Exception as e:
         logger.error(f"Error searching component relationships: {e}")
@@ -382,10 +191,145 @@ def search_component_relationships(component_id: str) -> Dict[str, Any]:
         }
 
 
+def get_component_owners(component_id: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Get component ownership and responsibility information.
+
+    Args:
+        component_id: Specific component to get ownership for, or None for all components
+
+    Returns:
+        Dict containing component ownership information
+    """
+    try:
+        if component_id:
+            # Get ownership for a specific component
+            result = query_knowledge_graph(
+                "ownership", component_id=component_id)
+
+            if result["success"]:
+                return {
+                    "success": True,
+                    "component_id": component_id,
+                    "ownership": result["ownership"],
+                    "note": "Data retrieved from centralized PYRAMID knowledge graph"
+                }
+            else:
+                return {
+                    "success": False,
+                    "component_id": component_id,
+                    "error": result.get("error", "Ownership information not found"),
+                    "note": "Data retrieved from centralized PYRAMID knowledge graph"
+                }
+        else:
+            # Get all component ownership information
+            result = get_all_component_owners()
+
+            if result["success"]:
+                return {
+                    "success": True,
+                    "total_components": result["total_components"],
+                    "ownership_data": result["ownership_data"],
+                    "note": "Data retrieved from centralized PYRAMID knowledge graph"
+                }
+            else:
+                return {
+                    "success": False,
+                    "error": result.get("error", "Failed to retrieve ownership data"),
+                    "note": "Data retrieved from centralized PYRAMID knowledge graph"
+                }
+
+    except Exception as e:
+        logger.error(f"Error getting component owners: {e}")
+        return {
+            "error": f"Failed to get component owners: {str(e)}",
+            "component_id": component_id
+        }
+
+
+def get_components_by_responsible_person(person_name: str) -> Dict[str, Any]:
+    """
+    Get components associated with a specific person (owner, lead, etc.).
+
+    Args:
+        person_name: Name of the person to search for
+
+    Returns:
+        Dict containing components associated with the person
+    """
+    try:
+        result = get_component_by_owner(person_name)
+
+        if result["success"]:
+            return {
+                "success": True,
+                "person_name": person_name,
+                "total_components": result["total_found"],
+                "components": result["components"],
+                "note": "Data retrieved from centralized PYRAMID knowledge graph"
+            }
+        else:
+            return {
+                "success": False,
+                "person_name": person_name,
+                "error": result.get("error", "No components found for this person"),
+                "note": "Data retrieved from centralized PYRAMID knowledge graph"
+            }
+
+    except Exception as e:
+        logger.error(f"Error getting components by person: {e}")
+        return {
+            "error": f"Search error: {str(e)}",
+            "person_name": person_name,
+            "components": []
+        }
+
+
+def get_components_by_sector(sector: str) -> Dict[str, Any]:
+    """
+    Get components associated with a specific sector.
+
+    Args:
+        sector: Name of the sector to search for
+
+    Returns:
+        Dict containing components associated with the sector
+    """
+    try:
+        result = get_components_by_sector(sector)
+
+        if result["success"]:
+            return {
+                "success": True,
+                "sector": sector,
+                "total_components": result["total_found"],
+                "components": result["components"],
+                "note": "Data retrieved from centralized PYRAMID knowledge graph"
+            }
+        else:
+            return {
+                "success": False,
+                "sector": sector,
+                "error": result.get("error", "No components found for this sector"),
+                "note": "Data retrieved from centralized PYRAMID knowledge graph"
+            }
+
+    except Exception as e:
+        logger.error(f"Error getting components by sector: {e}")
+        return {
+            "error": f"Search error: {str(e)}",
+            "sector": sector,
+            "components": []
+        }
+
+
 # Export functions
 __all__ = [
     'initialize_pra_tools',
     'search_pra_components',
     'get_component_details',
     'search_component_relationships',
+    'get_component_owners',
+    'get_components_by_responsible_person',
+    'get_components_by_sector',
 ]

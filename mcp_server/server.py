@@ -593,16 +593,62 @@ def search_pra_component_relationships(component_id: str) -> Dict[str, Any]:
     return search_component_relationships(component_id)
 
 
+@mcp.tool()
+def get_pra_component_owners(component_id: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Get component ownership and responsibility information.
+
+    Args:
+        component_id: Specific component to get ownership for, or None for all components
+
+    Returns:
+        Dict containing component ownership information including responsible people and sectors
+    """
+    from tools.pra_tools import get_component_owners
+    return get_component_owners(component_id)
+
+
+@mcp.tool()
+def get_components_by_responsible_person(person_name: str) -> Dict[str, Any]:
+    """
+    Get components associated with a specific person (owner, lead, etc.).
+
+    Args:
+        person_name: Name of the person to search for
+
+    Returns:
+        Dict containing components associated with the person
+    """
+    from tools.pra_tools import get_components_by_responsible_person
+    return get_components_by_responsible_person(person_name)
+
+
+@mcp.tool()
+def get_components_by_sector(sector: str) -> Dict[str, Any]:
+    """
+    Get components associated with a specific sector.
+
+    Args:
+        sector: Name of the sector to search for (e.g., "Defence", "Cybersecurity", "Data")
+
+    Returns:
+        Dict containing components associated with the sector
+    """
+    from tools.pra_tools import get_components_by_sector
+    return get_components_by_sector(sector)
+
+
 def main():
     """Main entry point for the MCP server."""
     logger.info("Starting PYRAMID MCP Server...")
     logger.info(f"Data directory: {DATA_DIR}")
     logger.info("Available tools:")
     logger.info("Phase 1: Basic PDF processing (6 tools)")
-    logger.info("Phase 2: PYRAMID-specific tools (15 tools)")
+    logger.info("Phase 2: PYRAMID-specific tools (18 tools)")
     logger.info("  - Document Access: 5 tools")
     logger.info("  - Compliance: 5 tools")
     logger.info("  - PRA Components: 5 tools")
+    logger.info("  - Component Ownership: 3 tools")
     mcp.run()
 
 
